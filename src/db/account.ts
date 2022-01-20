@@ -15,9 +15,10 @@ export const accountAdd = (params: accountInterface) => {
       password,
       email,
       phoneNumber,
+      versionToken: 0,
     });
     return user.save();
-  } catch (error: any | unknown) {
+  } catch (error: any) {
     return error;
   }
 };
@@ -40,6 +41,15 @@ export const accountDelete = async (userName: string) => {
     });
     return user;
   } catch (error: any) {
+    return error;
+  }
+};
+
+export const accountTokenVersionInc = async (userName: string) => {
+  try {
+    const result = await Account.updateOne({ userName }, { $inc: { tokenVersion: 1 } });
+    return result;
+  } catch (error) {
     return error;
   }
 };
