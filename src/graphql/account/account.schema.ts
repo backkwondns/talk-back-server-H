@@ -9,7 +9,7 @@ export const accountTypes = gql`
   type Mutation {
     login(userName: String!, password: String): userToken
     logout: Boolean
-    register(userName: String!, password: String!, email: String!, phoneNumber: String!): userToken
+    register(userName: String!, password: String!, email: String!, phoneNumber: String!): Boolean
     userDelete(userName: String!): String
     revokeRefreshTokenForUser(userName: String!): Boolean
   }

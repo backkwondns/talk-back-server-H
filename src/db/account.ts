@@ -15,11 +15,12 @@ export const accountAdd = (params: accountInterface) => {
       password,
       email,
       phoneNumber,
-      versionToken: 0,
+      tokenVersion: 0,
     });
-    return user.save();
+    user.save();
+    return true;
   } catch (error: any) {
-    return error;
+    throw new Error(error);
   }
 };
 

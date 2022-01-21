@@ -27,14 +27,14 @@ export const accountResolvers = {
     login: async (_: any, { userName, password }: Record<string, string>, context: any) => {
       const user = await accountFind(userName);
       if (!user) {
-        throw new UserInputError('User not found!', {
-          error: { userName: 'User not found' },
+        throw new UserInputError('Wrong Credentials!', {
+          error: { userName: 'Wrong Credentials!' },
         });
       }
       const validPassword = await bcrypt.compare(password, user.password);
       if (!validPassword) {
-        throw new UserInputError('Wrong credentials', {
-          error: { password: 'Wrong credentials' },
+        throw new UserInputError('Wrong Credentials!', {
+          error: { password: 'Wrong Credentials!' },
         });
       }
       sendRefreshToken(
@@ -60,6 +60,7 @@ export const accountResolvers = {
     },
 
     register: async (_: any, { userName, password, email, phoneNumber }: Record<string, string>) => {
+      console.log(userName);
       const alreadyExist = await accountFind(userName);
       if (alreadyExist) {
         throw new UserInputError('Already exist UserName!', {
@@ -67,18 +68,11 @@ export const accountResolvers = {
         });
       } else {
         password = await bcrypt.hash(password, 10);
-        const addResult = await accountAdd({ userName, password, email, phoneNumber });
-        return {
-          userName: addResult.userName,
-          email: addResult.email,
-          phoneNumber: addResult.phoneNumber,
-          accessToken: createAccessToken({
-            userName: addResult.userName,
-            email: addResult.email,
-            phoneNumber: addResult.phoneNumber,
-          }),
-          tokenVersion: 0,
-        };
+        try {
+          return accountAdd({ userName, password, email, phoneNumber });
+        } catch (error) {
+          return error;
+        }
       }
     },
     userDelete: (_: any, { userName }: Record<string, string>) => {
