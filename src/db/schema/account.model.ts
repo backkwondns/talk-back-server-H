@@ -8,6 +8,7 @@ const accountSchema = new Schema(
     email: String,
     phoneNumber: String,
     tokenVersion: Number,
+    avatar: String,
   },
   {
     versionKey: false,

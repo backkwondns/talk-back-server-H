@@ -60,6 +60,7 @@ async function startApolloServer(typeDefs: any, resolvers: any) {
     return res.send({
       ok: true,
       accessToken: createAccessToken({ userName: user.userName, email: user.email, phoneNumber: user.phoneNumber }),
+      userInfo: { userName: user.userName, email: user.email, phoneNumber: user.phoneNumber },
     });
   });
   const httpServer = http.createServer(app);

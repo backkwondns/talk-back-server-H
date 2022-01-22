@@ -16,6 +16,7 @@ export const accountAdd = (params: accountInterface) => {
       email,
       phoneNumber,
       tokenVersion: 0,
+      avatar: '',
     });
     user.save();
     return true;
