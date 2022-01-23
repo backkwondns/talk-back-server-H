@@ -51,6 +51,7 @@ export const accountResolvers = {
         email: user.email,
         phoneNumber: user.phoneNumber,
         accessToken: createAccessToken({ userName: user.userName, email: user.email, phoneNumber: user.phoneNumber }),
+        setting: user.setting,
       };
     },
 

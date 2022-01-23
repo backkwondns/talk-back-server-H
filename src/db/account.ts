@@ -17,6 +17,7 @@ export const accountAdd = (params: accountInterface) => {
       phoneNumber,
       tokenVersion: 0,
       avatar: '',
+      setting: {},
     });
     user.save();
     return true;

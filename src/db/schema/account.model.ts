@@ -9,6 +9,7 @@ const accountSchema = new Schema(
     phoneNumber: String,
     tokenVersion: Number,
     avatar: String,
+    setting: Object,
   },
   {
     versionKey: false,
