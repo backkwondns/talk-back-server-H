@@ -7,6 +7,9 @@ const accountSchema = new Schema(
     password: String,
     email: String,
     phoneNumber: String,
+    tokenVersion: Number,
+    avatar: String,
+    setting: Object,
   },
   {
     versionKey: false,
