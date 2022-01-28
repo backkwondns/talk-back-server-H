@@ -16,6 +16,8 @@ import { sendRefreshToken } from './src/libs/sendRefreshToken';
 import cors from 'cors';
 dotenv.config();
 
+import mockRouter from './src/router/mock.router';
+
 const mongoServer = process.env.MONGO_SERVER!;
 mongoose.connect(mongoServer, (err) => {
   if (err) {
@@ -29,7 +31,8 @@ async function startApolloServer(typeDefs: any, resolvers: any) {
   const app = express();
   app.use(cookieParser());
   app.use(morgan('dev'));
-  app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+  app.use(cors({ origin: ['http://localhost:3000', 'http://192.168.0.40:3000'], credentials: true }));
+  app.use('/mock', mockRouter);
   app.post('/refresh_token', async (req, res) => {
     const token = req.cookies.refreshToken;
     if (!token) {
@@ -60,9 +63,10 @@ async function startApolloServer(typeDefs: any, resolvers: any) {
     return res.send({
       ok: true,
       accessToken: createAccessToken({ userName: user.userName, email: user.email, phoneNumber: user.phoneNumber }),
-      userInfo: { userName: user.userName, email: user.email, phoneNumber: user.phoneNumber },
+      userInfo: { userName: user.userName, email: user.email, phoneNumber: user.phoneNumber, setting: user.setting },
     });
   });
+
   const httpServer = http.createServer(app);
   const server = new ApolloServer({
     typeDefs,
@@ -71,6 +75,7 @@ async function startApolloServer(typeDefs: any, resolvers: any) {
     plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
   });
   await server.start();
+  // server.applyMiddleware({ app });
   server.applyMiddleware({ app, cors: false });
   await new Promise<void>((resolve) => httpServer.listen({ port: 4000 }, resolve));
   console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`);
