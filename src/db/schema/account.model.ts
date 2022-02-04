@@ -8,7 +8,6 @@ const accountSchema = new Schema(
     email: String,
     phoneNumber: String,
     tokenVersion: Number,
-    avatar: String,
     setting: Object,
   },
   {
@@ -17,4 +16,5 @@ const accountSchema = new Schema(
   },
 );
 
-export const Account = mongoose.model('Account', accountSchema);
+const Account = mongoose.model('Account', accountSchema);
+export default Account;

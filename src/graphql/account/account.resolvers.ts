@@ -1,17 +1,18 @@
-import { accountAdd, accountDelete, accountFind, accountTokenVersionInc } from '../../db/account';
+import { accountAdd, accountAddMock, accountDelete, accountFind, accountTokenVersionInc } from '../../db/account';
 import { GraphQLDateTime } from 'graphql-iso-date';
 import bcrypt from 'bcryptjs';
 import { UserInputError } from 'apollo-server-express';
 import { createAccessToken, createRefreshToken } from '../../libs/auth';
 import { isAuth } from '../../libs/isAuth';
 import { sendRefreshToken } from '../../libs/sendRefreshToken';
+import { registerMockInterface } from './account.interface';
 
 export const accountResolvers = {
   timeStamp: GraphQLDateTime,
   Query: {
-    userFind: (_: any, { userName }: { userName: string }, context: any) => {
+    userFind: async (_: any, { userName }: { userName: string }, context: any) => {
       isAuth(context);
-      return accountFind(userName);
+      return await accountFind(userName);
     },
   },
   Mutation: {
@@ -60,8 +61,22 @@ export const accountResolvers = {
       return true;
     },
 
+    registerMock: async (_: any, { userName, password, email, phoneNumber, setting }: registerMockInterface) => {
+      const alreadyExist = await accountFind(userName);
+      if (alreadyExist) {
+        throw new UserInputError('Already exist UserName!', {
+          error: { userName: 'Already Exist UserName' },
+        });
+      } else {
+        password = await bcrypt.hash(password, 10);
+        try {
+          return accountAddMock({ userName, password, email, phoneNumber, setting });
+        } catch (error) {
+          return error;
+        }
+      }
+    },
     register: async (_: any, { userName, password, email, phoneNumber }: Record<string, string>) => {
-      console.log(userName);
       const alreadyExist = await accountFind(userName);
       if (alreadyExist) {
         throw new UserInputError('Already exist UserName!', {
