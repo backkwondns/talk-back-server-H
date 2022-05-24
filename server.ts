@@ -17,6 +17,10 @@ import cors from 'cors';
 dotenv.config();
 
 import mockRouter from './src/router/mock.router';
+import { makeExecutableSchema } from '@graphql-tools/schema';
+import { SubscriptionServer } from 'subscriptions-transport-ws';
+import { subscribe } from 'graphql';
+import { execute } from 'graphql';
 
 const mongoServer = process.env.MONGO_SERVER!;
 mongoose.connect(mongoServer, (err) => {
@@ -68,11 +72,32 @@ async function startApolloServer(typeDefs: any, resolvers: any) {
   });
 
   const httpServer = http.createServer(app);
-  const server = new ApolloServer({
+
+  const schema = makeExecutableSchema({
     typeDefs,
     resolvers,
+  });
+
+  const subscriptionServer = SubscriptionServer.create(
+    { schema, execute, subscribe },
+    { server: httpServer, path: '/subscriptions' },
+  );
+
+  const server = new ApolloServer({
+    schema,
     context: ({ req, res }) => ({ req, res }),
-    plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+    plugins: [
+      {
+        async serverWillStart() {
+          return {
+            async drainServer() {
+              subscriptionServer.close();
+            },
+          };
+        },
+      },
+    ],
+    // plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
   });
   await server.start();
   // server.applyMiddleware({ app });

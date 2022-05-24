@@ -1,11 +1,18 @@
-import { accountAdd, accountAddMock, accountDelete, accountFind, accountTokenVersionInc } from '../../db/account';
+import {
+  accountAdd,
+  accountAddMock,
+  accountDelete,
+  accountFind,
+  accountTokenVersionInc,
+  checkDuplicate,
+} from '../../db/account';
 import { GraphQLDateTime } from 'graphql-iso-date';
 import bcrypt from 'bcryptjs';
 import { UserInputError } from 'apollo-server-express';
 import { createAccessToken, createRefreshToken } from '../../libs/auth';
 import { isAuth } from '../../libs/isAuth';
 import { sendRefreshToken } from '../../libs/sendRefreshToken';
-import { registerMockInterface } from './account.interface';
+import { registerMockInterface } from '../../interface/account.interface';
 
 export const accountResolvers = {
   timeStamp: GraphQLDateTime,
@@ -77,10 +84,10 @@ export const accountResolvers = {
       }
     },
     register: async (_: any, { userName, password, email, phoneNumber }: Record<string, string>) => {
-      const alreadyExist = await accountFind(userName);
+      const alreadyExist = await checkDuplicate(userName, email, phoneNumber);
       if (alreadyExist) {
-        throw new UserInputError('Already exist UserName!', {
-          error: { userName: 'Already Exist UserName' },
+        throw new UserInputError('Already exist User!', {
+          error: { userName: 'Already Exist User' },
         });
       } else {
         password = await bcrypt.hash(password, 10);
