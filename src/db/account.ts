@@ -1,14 +1,6 @@
+import { accountInterface } from '../interface';
 import Account from './schema/account.model';
 import Friend from './schema/friend.model';
-
-interface accountInterface {
-  userName: string;
-  password?: string;
-  email?: string;
-  phoneNumber?: string;
-  avatar?: string;
-  statusMessage?: string;
-}
 
 export const accountAddMock = (params: {
   password: string;
@@ -29,6 +21,7 @@ export const accountAddMock = (params: {
         ...setting,
         theme: 'light',
       },
+      talksList: [],
     });
     user.save();
     const friends = new Friend({
@@ -41,7 +34,7 @@ export const accountAddMock = (params: {
     throw new Error(error);
   }
 };
-export const accountAdd = (params: accountInterface) => {
+export const accountAdd = (params: accountInterface.accountAddInterface) => {
   const { userName, password, email, phoneNumber } = params;
   try {
     const user = new Account({
@@ -49,10 +42,13 @@ export const accountAdd = (params: accountInterface) => {
       password,
       email,
       phoneNumber,
-      tokenVersion: 0,
-      setting: { avatar: '', statusMessage: '', mode: 'light' },
     });
     user.save();
+    const friends = new Friend({
+      userName,
+      friends: [],
+    });
+    friends.save();
     return true;
   } catch (error: any) {
     throw new Error(error);
@@ -68,6 +64,28 @@ export const accountFind = async (userName: string) => {
       '-_id',
     );
     return foundAccount;
+  } catch (error: any) {
+    return error;
+  }
+};
+
+export const checkDuplicate = async (userName: string, email: string, phoneNumber: string) => {
+  try {
+    return await Account.findOne({ $or: [{ userName }, { email }, { phoneNumber }] });
+  } catch (error: any) {
+    throw new Error(error);
+  }
+};
+
+export const accountAvatar = async (userName: string) => {
+  try {
+    const foundAccount = await Account.findOne(
+      {
+        userName,
+      },
+      'setting.avatar',
+    );
+    return foundAccount.setting.avatar;
   } catch (error: any) {
     return error;
   }
@@ -90,5 +108,13 @@ export const accountTokenVersionInc = async (userName: string) => {
     return result;
   } catch (error) {
     return error;
+  }
+};
+
+export const readUpdate = async (userName: string, roomID: string, talkID: string) => {
+  try {
+    await Account.updateOne({ userName, 'talksList.roomID': roomID }, { 'talksList.talkID': talkID });
+  } catch (error: any) {
+    throw new Error(error);
   }
 };
